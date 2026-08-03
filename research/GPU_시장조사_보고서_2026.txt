@@ -1,0 +1,106 @@
+그래픽카드(GPU) 시장조사 보고서
+
+작성일: 2026년 8월 3일
+문서 구분: 내부 보고용
+예상 독자: 교수
+
+────────────────────────────────────────
+
+1. 조사 목적
+
+본 보고서는 2026년을 기준으로 그래픽카드(GPU) 산업의 최신 시장 동향을 조사하여, 소비자용 그래픽카드 시장과 인공지능(AI)·데이터센터용 GPU 시장의 변화, 신규 아키텍처 로드맵, 공급망 및 가격 이슈, 그리고 전기차(EV)·자율주행 분야로의 GPU 활용 확대 현황을 정리함으로써 산업 전반에 대한 이해를 제공하는 것을 목적으로 한다.
+
+2. 조사 배경
+
+최근 인공지능 산업의 급격한 성장으로 GPU는 게이밍용 하드웨어를 넘어 AI 연산의 핵심 인프라로 자리매김하였다. 이에 따라 GPU 시장은 소비자 시장과 데이터센터 시장이 상이한 성장 동력을 보이고 있으며, 메모리 반도체 공급 부족, 신규 아키텍처 경쟁, 전기차·자율주행 산업과의 융합 등 다양한 변수가 시장 구조에 영향을 미치고 있다. 이러한 배경에서 최신 동향을 종합적으로 파악할 필요성이 대두되었다.
+
+3. 조사 방법
+
+본 조사는 2026년 상반기~하반기(1~3분기) 발표된 산업 리포트, 시장조사기관 자료, 주요 제조사(NVIDIA, AMD, Intel) 발표 자료 및 언론 보도를 웹 검색을 통해 수집·분석하는 방식으로 진행하였다. 조사 범위는 (1) 소비자용 데스크톱 GPU 시장, (2) AI·데이터센터 GPU 시장, (3) 신규 아키텍처 및 제품 로드맵, (4) 가격·공급망(HBM4 메모리) 동향, (5) 전기차·자율주행 분야 GPU 활용으로 구성하였다.
+
+────────────────────────────────────────
+
+4. 시장 동향 분석
+
+4.1 소비자(데스크톱) GPU 시장
+
+2026년 1분기 기준 전 세계 데스크톱 GPU 출하량은 약 1,182만 대로 집계되었으며, 전 분기 대비 감소폭이 0.6%에 그쳐 예년 평균 감소폭(약 12%)보다 완만한 흐름을 보였다. 기업별 점유율은 NVIDIA가 약 90%로 압도적 우위를 유지하고 있으며, AMD가 약 8%, Intel이 약 1%대로 뒤를 잇고 있다. 특히 Intel은 Arc 시리즈를 앞세워 AI 관련 수요에 힘입어 점유율을 소폭 확대하는 추세를 보이고 있다.
+
+4.2 AI·데이터센터 GPU 시장
+
+AI 가속기(AI Accelerator) 시장에서는 NVIDIA가 매출 기준 약 75~81%의 점유율로 시장을 주도하고 있으며, AMD는 Instinct 제품군을 통해 약 5~7% 수준의 점유율을 차지하고 있다. 2026년 GPU 시장 전체 규모는 약 1,448억 달러로 추정되며, 연평균 성장률(CAGR) 15.39%를 기록하여 2031년에는 약 2,963억 달러 규모에 이를 것으로 전망된다.
+
+빅테크 기업(아마존, 구글, 메타, 마이크로소프트)의 2026년 합산 설비투자(CapEx)는 약 7,250억 달러로, 2025년(약 4,100억 달러) 대비 대폭 증가하였으며, 증가분의 상당 부분이 AI 인프라, 특히 GPU 확보에 투입되고 있다. 한편 자체 개발 ASIC(맞춤형 반도체) 출하량이 전년 대비 44.6% 증가하며 범용 GPU 성장률(16.1%)을 크게 상회하고 있어, 2026년 가속기 서버 출하량의 약 27.8%가 ASIC 기반으로 전환될 것으로 예상된다. 이는 초대형 클라우드 사업자를 중심으로 GPU 의존도를 낮추려는 움직임이 본격화되고 있음을 시사한다.
+
+4.3 신규 아키텍처 및 제품 로드맵
+
+NVIDIA는 차세대 아키텍처 Rubin(루빈)의 양산을 2026년 하반기 목표로 추진 중이며, 소비자용 제품(RTX 60 시리즈)은 2026년 말~2027년 초 출시가 예상된다. Rubin은 TSMC 3나노급 공정을 최초로 적용하는 소비자용 GPU 세대로, 기존 4나노 공정(RTX 50 시리즈) 대비 약 15% 향상된 트랜지스터 밀도를 바탕으로 동일 전력 대비 10~15%의 성능 향상 또는 동일 성능 대비 20~30%의 전력 절감이 가능할 것으로 전망된다.
+
+AMD는 차세대 RDNA 5 아키텍처를 준비 중이나, 협력사 전망에 따르면 실제 출시 시점은 2027년 하반기~2028년 초로 예상되어, NVIDIA Rubin 대비 출시가 다소 지연될 것으로 보인다. 이는 당분간 소비자용 고성능 GPU 시장에서 NVIDIA의 우위가 지속될 가능성을 시사한다.
+
+4.4 가격 및 공급망 동향: HBM4 메모리 이슈
+
+2026년 GPU 산업의 핵심 병목 요인은 HBM(고대역폭 메모리) 공급 부족이다. SK하이닉스, 삼성전자, 마이크론 3사 모두 HBM4 다이(die) 설계를 재설계하면서 양산 시점이 당초 2025년에서 2026년 1~2분기로 지연되었다. SK하이닉스는 2026년 6월 말 NVIDIA용 12단 HBM4 양산 출하를 개시하였으며, 삼성전자와 마이크론 또한 같은 시기 NVIDIA의 Vera Rubin 플랫폼용 HBM4 양산에 합류하였다.
+
+SK하이닉스는 2026년 D램·낸드·HBM 생산 물량이 사실상 모두 선판매(완판)되었다고 밝혔으며, HBM 수요는 연 80~100% 증가하는 반면 공급 증가율은 50~60%에 그쳐 공급 부족이 구조적으로 지속되고 있다. 이에 따라 삼성전자와 SK하이닉스는 2026년 HBM3E 공급 가격을 전년 대비 약 20% 인상하였으며, NVIDIA는 소비자용 GDDR7 메모리와 HBM 생산 라인이 동일 설비를 공유함에 따라 2026년 상반기 RTX 50 시리즈 생산량을 30~40% 축소한 것으로 알려졌다.
+
+이러한 공급 부족에 대응하기 위해 NVIDIA-SK그룹은 5,000억 달러 규모의 장기 HBM4 공급 협력을, 삼성전자-브로드컴은 2,000억 달러 규모의 별도 협력을 발표하는 등 HBM 관련 누적 투자·계약 규모가 9,500억 달러를 상회하는 것으로 집계된다.
+
+4.5 전기차(EV)·자율주행 분야 GPU 활용 동향
+
+GPU 산업은 게이밍·AI 데이터센터를 넘어 전기차 및 자율주행 산업으로도 빠르게 확장되고 있다. NVIDIA는 2026년 상반기 중 자동 차선 변경, 정지 신호·신호등 인식 등을 포함한 레벨 2(L2) 고속도로·도심 주행 기능을 출시하였으며, 하반기에는 자동 주차를 포함한 도심 자율주행 기능을 확대할 계획이다.
+
+하드웨어 측면에서 NVIDIA는 L2~L3급 차량에는 DRIVE AGX Orin 기반 SoC를, 완전자율주행(L4)급 차량에는 신규 Thor 세대 칩을 적용하는 전략을 취하고 있다. 차량용 컴퓨터 DRIVE AGX Thor는 개당 약 3,500달러 수준이며, 메르세데스-벤츠 등 완성차 업체가 2026년형 모델에 이를 채택하였다. 또한 재규어랜드로버(JLR)는 2026년부터 NVIDIA DRIVE AGX Orin 기반의 AI 정의(AI-defined) 플랫폼을 전 차종에 적용하기로 하였으며, 메르세데스-벤츠는 2026년 1분기 CLA 모델에 NVIDIA의 오픈소스 자율주행 AI를 탑재하여 출시하였다.
+
+한편 차세대 Vera Rubin 칩 플랫폼은 기존 대비 약 5배 향상된 AI 연산 성능을 제공하는 것으로 발표되었으며, 로보택시 등 완전자율주행(L4)을 목표로 하는 320억 파라미터 규모의 추론 모델 Alpamayo 2 Super 등 차량용 AI 모델 개발도 함께 진행되고 있다. 이러한 흐름은 GPU 기업이 게이밍·AI 인프라 중심의 사업구조에서 전기차·모빌리티 산업으로 매출 다각화를 꾀하고 있음을 보여준다.
+
+────────────────────────────────────────
+
+5. 주요 이슈 및 시사점
+
+첫째, NVIDIA는 소비자·AI 데이터센터·자동차용 GPU 전 영역에서 압도적인 지배력을 유지하고 있으며, 경쟁사인 AMD·Intel과의 격차는 단기간 내 좁혀지기 어려울 것으로 전망된다. 특히 AMD RDNA 5의 출시 지연은 NVIDIA의 소비자 시장 우위를 한동안 더 공고히 할 가능성이 크다.
+
+둘째, HBM4 메모리 공급 부족은 2026년 GPU 산업 전반의 구조적 리스크로 작용하고 있으며, 이는 소비자용 GPU 생산 축소와 가격 상승으로 직결되고 있다. 메모리 3사의 장기 공급 계약 체결은 이러한 리스크에 대한 산업계의 대응으로 해석할 수 있다.
+
+셋째, 초대형 클라우드 사업자를 중심으로 한 자체 ASIC 개발 확대는 범용 GPU에 대한 의존도를 낮추려는 구조적 변화의 신호로, 중장기적으로 GPU 시장의 성장률 및 경쟁 구도에 영향을 미칠 수 있는 변수로 판단된다.
+
+넷째, GPU 산업의 성장축이 게이밍에서 AI 데이터센터, 나아가 전기차·자율주행 산업으로 확장되고 있다는 점은 주목할 만하다. 이는 GPU 기업의 사업 모델이 하드웨어 판매를 넘어 AI 소프트웨어·플랫폼 사업으로 진화하고 있음을 보여주는 사례로 볼 수 있다.
+
+6. 결론
+
+2026년 GPU 시장은 AI 인프라 투자 확대에 힘입어 지속적인 고성장세를 이어가고 있으며, NVIDIA의 시장 지배력이 소비자·데이터센터·자동차 전 영역에서 공고히 유지되고 있다. 다만 HBM4 메모리 공급 부족에 따른 생산·가격 리스크, 클라우드 사업자의 자체 ASIC 확대, 경쟁사의 신제품 출시 지연 등은 향후 시장 구도에 변화를 가져올 수 있는 주요 변수로 지속적인 관찰이 필요하다. 아울러 전기차·자율주행 산업과의 융합은 GPU 산업의 새로운 성장 동력으로 부상하고 있어, 향후 관련 산업 동향에 대한 추가적인 조사가 필요할 것으로 판단된다.
+
+────────────────────────────────────────
+
+7. 참고자료
+
+- Desktop GPU shipments hold steady in Q1 2026 with NVIDIA maintaining 90% market share, TweakTown
+  https://www.tweaktown.com/news/112161/desktop-gpu-shipments-hold-steady-in-q1-2026-with-nvidia-maintaining-90-percent-market-share/index.html
+- GPU market in the first quarter of 2026: 11.82 million graphics cards shipped, Igor's Lab
+  https://www.igorslab.de/en/?p=322435
+- AI GPU Market Share NVIDIA vs AMD vs Intel: 2026 Statistics, Commandlinux
+  https://commandlinux.com/statistics/ai-gpu-market-share-nvidia-vs-amd-vs-intel/
+- Graphics Processing Unit (GPU) Market Size, Trends, Share & Industry Report, Mordor Intelligence
+  https://www.mordorintelligence.com/industry-reports/graphics-processing-unit-market
+- Data Center GPU Market Size, Share & Growth 2026-2034, Stratview Research
+  https://www.stratviewresearch.com/market-reports/data-center-gpu-market
+- AI Demand to Drive $600B From the Big Five for GPU and Data Center Boom by 2026, CarbonCredits
+  https://carboncredits.com/ai-demand-to-drive-600b-from-the-big-five-for-gpu-and-data-center-boom-by-2026/
+- Desktop GPU roadmap: Nvidia Rubin, AMD UDNA & Intel Xe3 Celestial, Tom's Hardware
+  https://www.tomshardware.com/pc-components/gpus/desktop-gpu-roadmap-nvidia-rubin-amd-udna-and-intel-xe3-celestial
+- AMD board partners reportedly expect RDNA 5 GPUs in mid to late 2027, VideoCardz
+  https://videocardz.com/newz/amd-board-partners-reportedly-expect-rdna-5-gpus-in-mid-to-late-2027
+- The 2026 GPU Memory Crisis: What the Data Actually Shows, Barrack AI
+  https://blog.barrack.ai/2026-gpu-memory-crisis/
+- HBM4 Shortage Fuels $950B in Chip Supply Deals, Tech Insider Canada
+  https://tech-insider.org/ca/hbm4-shortage-950-billion-chip-deals-2026/
+- HBM4 Delays and GDDR7 Shortages, SoftwareSeni
+  https://www.softwareseni.com/hbm4-delays-and-gddr7-shortages-the-memory-bottlenecks-squeezing-gpu-supply-in-2026/
+- Nvidia unveils open-source AI for autonomous driving, ships in Mercedes-Benz CLA in Q1 2026, Electrek
+  https://electrek.co/2026/01/05/nvidia-unveils-open-source-ai-for-autonomous-driving-ships-in-mercedes-benz-cla-in-q1-2026/
+- Wave of EV Makers Choose NVIDIA DRIVE for Automated Driving, NVIDIA Newsroom
+  https://nvidianews.nvidia.com/news/wave-of-ev-makers-choose-nvidia-drive-for-automated-driving
+- NVIDIA DRIVE Powers Next Generation of Transportation, NVIDIA Newsroom
+  https://nvidianews.nvidia.com/news/nvidia-drive-powers-next-generation-transportation
+- AI: Nvidia's growing chops in self driving cars & Vera Rubin AI GPU chip metrics, Michael Parekh Substack
+  https://michaelparekh.substack.com/p/ai-nvidias-growing-chops-in-self
