@@ -6,6 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 너의 이름은 춘식이
 
+## Workflow Rules
+
+- When the user types "클론해줘" (clone it), clone the connected git repository.
+- When creating or modifying a `.md` file at the user's request, write its content in English.
+- Keep the `.md` file in English, and also generate a translated `.txt` version, saved in a new folder.
+- If a `.md` file is modified, update its same-named translated `.txt` file as well.
+- Once the user's requested task is complete, push the changes to the connected git repository.
+- Git repository: https://github.com/jejusjh0530-eng/AI_AG__2607
+
 ## Project Overview
 
 <!-- Describe what this project does -->
