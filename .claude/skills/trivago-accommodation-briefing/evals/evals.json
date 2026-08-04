@@ -1,0 +1,46 @@
+{
+  "skill_name": "trivago-accommodation-briefing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "제주도 숙소 중에 8월 10일부터 12일까지 2박, 성인 2명 기준으로 최저가 5개만 골라서 브리핑해줘. 별점이랑 후기 평점도 같이 보여줘.",
+      "expected_output": "Calls trivago-accommodation-search for Jeju with arrival 2026-08-10 / departure 2026-08-12, adults 2. Returns exactly 5 accommodations sorted by lowest price_per_night, with a comparison table (name/price/star rating/review score+count) plus per-hotel detail cards and links, plus a short summary. Also saves a markdown file with the briefing.",
+      "files": [],
+      "assertions": [
+        { "text": "no_unnecessary_clarifying_question", "description": "Does not ask the user for more info — every required parameter (destination, dates, guests, count, sort) was already given." },
+        { "text": "exactly_5_results", "description": "The briefing features exactly 5 accommodations, matching the requested count." },
+        { "text": "sorted_by_price_ascending", "description": "Featured accommodations are ordered from lowest to highest price_per_night." },
+        { "text": "includes_comparison_table", "description": "Response includes a markdown comparison table (name/price/rating/review score) up front, not just individual cards." },
+        { "text": "includes_rating_and_review", "description": "Each featured accommodation shows both a star/hotel rating and a guest review score with review count." },
+        { "text": "includes_link", "description": "Each featured accommodation includes a clickable trivago URL." },
+        { "text": "saved_report_file", "description": "A separate markdown briefing file (not just the chat response) was saved to disk." }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "이번 주말에 부산 해운대 근처 숙소 좀 알아봐줘. 별점 높은 순으로다가.",
+      "expected_output": "Dates ('이번 주말') and guest count are ambiguous/missing, so the skill should ask the user to confirm exact check-in/check-out dates and number of guests before searching, rather than guessing. Should also note the ranking will be by rating (not price) per the user's request, once parameters are confirmed.",
+      "files": [],
+      "assertions": [
+        { "text": "asks_for_dates", "description": "Response asks the user to confirm exact check-in/check-out dates rather than silently resolving '이번 주말' itself." },
+        { "text": "asks_for_guest_count", "description": "Response asks the user to confirm number of guests, since it was never stated." },
+        { "text": "does_not_call_search_tool", "description": "No trivago search tool call happens before the missing parameters are confirmed — no fabricated/guessed results are presented as final." },
+        { "text": "acknowledges_rating_sort", "description": "Response shows it understood the ranking priority is by rating, not price, so it doesn't need to re-ask that." }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "N서울타워 반경 2km 이내에 있는 숙소 좀 알아봐줘. 9월 5일부터 9월 7일까지 2인 기준이고, 게스트하우스나 저렴한 곳 위주로 보고 싶어.",
+      "expected_output": "Resolves N Seoul Tower to approximate coordinates and calls trivago-accommodation-radius-search with arrival 2026-09-05 / departure 2026-09-07, adults 2, sorted by lowest price. Since the user didn't give an explicit count, the skill should ask how many results to feature (or reasonably confirm) rather than picking an arbitrary number silently. Briefing includes comparison table + detail cards + summary, and unrated properties (hotel_rating 0) are labeled as unrated rather than shown as 0 stars.",
+      "files": [],
+      "assertions": [
+        { "text": "uses_radius_search_with_real_coordinates", "description": "Calls trivago-accommodation-radius-search with coordinates plausibly near N Seoul Tower (~37.55N, 126.99E), not the query-based search tool and not placeholder coordinates." },
+        { "text": "sorted_by_price_ascending", "description": "Featured accommodations are ordered from lowest to highest price_per_night, matching the '저렴한 곳 위주' request." },
+        { "text": "handles_unspecified_count_reasonably", "description": "Since the user didn't state how many results to feature, the response either asks or explicitly states/justifies the count chosen, rather than silently picking an arbitrary number." },
+        { "text": "unrated_label_correct", "description": "If any featured accommodation has hotel_rating 0, it is labeled as unrated/no official star rating, not shown as literally 0 stars." },
+        { "text": "includes_comparison_table_and_cards", "description": "Response includes both a compact comparison table and per-hotel detail info (price, rating, link)." },
+        { "text": "saved_report_file", "description": "A separate markdown briefing file was saved to disk, not just the chat response." }
+      ]
+    }
+  ]
+}

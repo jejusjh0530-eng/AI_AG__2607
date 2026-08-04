@@ -1,0 +1,75 @@
+# Trivago MCP – 사용 가능한 기능
+
+이 문서는 Trivago MCP(Model Context Protocol) 연동을 통해 제공되는 도구와 사용 방법을 설명합니다.
+
+## 개요
+
+Trivago MCP는 trivago의 호텔 및 숙소 데이터베이스를 조회하는 두 가지 숙소 검색 도구를 제공합니다. 두 도구 모두 주어진 조건(날짜, 인원, 필터, 평점)에 맞는 호텔/숙소 목록을 반환합니다.
+
+## 도구
+
+### 1. `trivago-accommodation-search`
+
+목적지 이름 또는 관심 지점(예: 도시, 지역, 랜드마크 이름)으로 숙소와 호텔을 검색합니다.
+
+**필수 파라미터**
+- `query` – 목적지 또는 관심 지점(텍스트 검색, 예: "Seoul", "Jeju Island").
+- `arrival` – 도착 날짜 (`YYYY-MM-DD`). 미래 날짜여야 하며 `departure`보다 이전이어야 함.
+- `departure` – 출발 날짜 (`YYYY-MM-DD`). `arrival`보다 이후여야 함.
+
+**선택 파라미터**
+- `adults` – 성인 인원 수(최소 1명).
+- `children` – 어린이 인원 수(최소 0명).
+- `children_ages` – 어린이 나이 목록, 대시(-)로 구분 (예: `10-12-14`).
+- `rooms` – 객실 수(성인 인원 수 이하여야 함).
+- `country` – 시장별 가격/콘텐츠를 결정하는 ISO alpha-2 국가 코드(기본값 `US`).
+- `currency` – 표시 가격의 ISO 4217 통화 코드(기본값 `USD`).
+- `language` – 번역된 콘텐츠의 언어 코드(기본값 `EN_US`; 한국어는 `KO_KR` 포함).
+- `hotel_rating` – 호텔 성급(별점) 필터: `1star`~`5star` (불리언 플래그, 다중 선택 가능).
+- `review_rating` – 게스트 리뷰 평점 필터: `rating70`, `rating75`, `rating80`, `rating85` (7.0+, 7.5+, 8.0+, 8.5+).
+- `filters` – 편의시설 필터(불리언 플래그, 다중 선택 가능):
+  - `airConditioning` (에어컨)
+  - `breakfastIncluded` (조식 포함)
+  - `freeCancellation` (무료 취소)
+  - `freeWiFi` (무료 와이파이)
+  - `gym` (헬스장)
+  - `kitchen` (주방)
+  - `parking` (주차)
+  - `petFriendly` (반려동물 동반 가능)
+  - `pool` (수영장)
+  - `spa` (스파)
+
+**사용 사례:** 목적지 기반의 일반적인 호텔 검색, 예: "8월 20일~22일 부산 호텔 찾아줘."
+
+---
+
+### 2. `trivago-accommodation-radius-search`
+
+텍스트 검색어 대신 지리 좌표(랜드마크, 인근 지역, 주소)를 사용하여 특정 위치 주변의 숙소와 호텔을 검색합니다.
+
+**필수 파라미터**
+- `latitude` – 검색 대상 위치의 위도.
+- `longitude` – 검색 대상 위치의 경도.
+- `arrival` – 도착 날짜 (`YYYY-MM-DD`). 미래 날짜여야 하며 `departure`보다 이전이어야 함.
+- `departure` – 출발 날짜 (`YYYY-MM-DD`). `arrival`보다 이후여야 함.
+
+**선택 파라미터**
+- `trivago-accommodation-search`와 동일: `adults`, `children`, `children_ages`, `rooms`, `country`, `currency`, `language`, `hotel_rating`, `review_rating`, `filters`.
+
+**사용 사례:** 특정 지점 주변의 반경/근접 검색, 예: "이 정확한 좌표 근처 랜드마크 인근 호텔을 찾아줘."
+
+---
+
+## 공통 파라미터 참고 사항
+
+- **날짜**: `arrival`과 `departure` 모두 `YYYY-MM-DD` 형식을 사용합니다. `arrival`은 미래 날짜여야 하며 `departure`보다 앞서야 합니다.
+- **통화/국가**: 지역화된 가격 표시를 위해 다양한 ISO 코드(40개 이상의 국가, 40개 이상의 통화)를 지원합니다.
+- **언어**: 한국어(`KO_KR`)를 포함하여 40개 이상의 로케일 코드로 번역된 호텔 콘텐츠를 지원합니다.
+- **필터 및 평점**: 모든 필터/평점 항목은 불리언 플래그이며, 여러 개를 동시에 `true`로 설정하여 결과를 좁힐 수 있습니다.
+
+## 어떤 도구를 사용해야 할까요
+
+| 상황 | 도구 |
+|---|---|
+| 도시/지역/랜드마크 이름으로 검색 | `trivago-accommodation-search` |
+| 정확한 좌표/특정 지점 주변 반경으로 검색 | `trivago-accommodation-radius-search` |

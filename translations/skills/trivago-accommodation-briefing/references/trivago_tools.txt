@@ -1,0 +1,43 @@
+[한국어 번역 / Korean Translation]
+원본: .claude/skills/trivago-accommodation-briefing/references/trivago_tools.md
+
+# 트리바고 MCP 도구 — 파라미터 참고 문서
+
+## `trivago-accommodation-search`
+
+목적지 이름 또는 관심 지점으로 검색.
+
+**필수**
+- `query` — 목적지 또는 관심 지점 (예: "Seoul", "Jeju Island").
+- `arrival`, `departure` — `YYYY-MM-DD` 형식, 도착일은 미래여야 하며 출발일보다 앞서야 함.
+
+**선택**
+- `adults` (최소 1), `children` (최소 0), `children_ages` (대시로 구분, 예: `10-12-14`)
+- `rooms` (성인 수 이하여야 함)
+- `country` — ISO alpha-2 국가 코드 (기본값 `US`)
+- `currency` — ISO 4217 통화 코드 (기본값 `USD`)
+- `language` — 언어/지역 코드 (기본값 `EN_US`, `KO_KR` 포함)
+- `hotel_rating` — 불리언 플래그 `1star`~`5star`, 다중 선택 가능
+- `review_rating` — 불리언 플래그 `rating70`, `rating75`, `rating80`, `rating85` (7.0+/7.5+/8.0+/8.5+)
+- `filters` — 편의시설 불리언 플래그: `airConditioning`, `breakfastIncluded`, `freeCancellation`, `freeWiFi`, `gym`, `kitchen`, `parking`, `petFriendly`, `pool`, `spa`
+
+## `trivago-accommodation-radius-search`
+
+정확한 좌표로 검색 (랜드마크/동네/주소는 먼저 위도·경도로 변환해야 함 — 이 도구는 장소 이름을 받지 않음).
+
+**필수**
+- `latitude`, `longitude` — 검색 중심점.
+- `arrival`, `departure` — 위와 동일한 규칙.
+
+**선택**
+- `trivago-accommodation-search`와 동일: `adults`, `children`, `children_ages`, `rooms`, `country`, `currency`, `language`, `hotel_rating`, `review_rating`, `filters`.
+
+## 응답 형식 (두 도구 공통)
+
+각 응답에는 다음이 포함됩니다:
+- `system_message` — trivago 자체의 형식 지침(표가 아닌 숙소별 개별 카드로 렌더링). 이 스킬이 이를 비교 표와 어떻게 절충하는지는 SKILL.md 4단계 참고.
+- `accommodations[]` — 각 항목: `accommodation_name`, `price_per_night`, `price_per_stay`, `currency`, `hotel_rating` (0 = 등급 없음), `review_rating`, `review_count`, `top_amenities`, `accommodation_url`, `main_image`, `latitude`/`longitude`, `distance`, `country_city`, `advertisers`.
+
+참고 사항:
+- 가격은 통화 기호/쉼표가 포함된 문자열로 미리 포맷되어 있습니다 (예: `"39,624 원"`) — 정렬 전에 숫자가 아닌 문자를 제거하세요.
+- `hotel_rating: 0`은 나쁜 평점이 아니라 공식 성급 등급이 없다는 뜻입니다.
