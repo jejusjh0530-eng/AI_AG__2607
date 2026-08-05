@@ -1,6 +1,6 @@
 ---
 name: canva-design-workflow
-description: Turns a single topic into a finished Canva design through a concept-approval-first workflow — propose at least three design concepts, wait for the user to approve one, confirm what deliverable (poster, social post, presentation, card, etc.) they want, generate and save it as a draft in Canva, share a review link, and only on final approval export it as PNG and file it into a "canva/<topic>" folder in the user's Canva account. Use this whenever the user wants a Canva design made from an idea or topic (디자인 만들어줘, 포스터/카드뉴스/발표자료 제작, Canva 시안 만들어줘), especially when they want to see concept directions before anything is actually generated, rather than getting a design immediately.
+description: Turns a single topic into a finished Canva design through a concept-approval-first workflow — check whether a matching Canva brand template exists and recommend it, otherwise propose at least three design concepts and wait for the user to approve one, confirm what deliverable (poster, social post, presentation, card, etc.) they want, generate and save it as a draft in Canva, share a review link, and only on final approval export it as PNG and file it into a "canva/<topic>" folder in the user's Canva account. Use this whenever the user wants a Canva design made from an idea or topic (디자인 만들어줘, 포스터/카드뉴스/발표자료 제작, Canva 시안 만들어줘), especially when they want to see concept directions before anything is actually generated, rather than getting a design immediately.
 ---
 
 # Canva Design Workflow
@@ -19,7 +19,14 @@ Before proposing anything, make sure you have:
 
 If the topic itself is too vague to differentiate concepts (e.g. just "마케팅"), ask one clarifying question. Otherwise proceed — concepts don't require the deliverable type yet, so don't ask for that here.
 
-## Step 2: Propose at least three design concepts — text only, no tool calls
+## Step 2: Check for a matching template
+
+Before proposing custom concepts, check whether Canva already has a brand template that fits the topic — starting from a matching template is faster and usually better-designed than generating from scratch. Call `search-brand-templates` with `query` set to the topic.
+
+- **If a good match exists**, show it to the user (name, thumbnail, `create_url`) and ask whether they'd like to start from it instead of custom concepts. If they accept: skip Step 3 (custom concepts) and Step 4 (deliverable-type confirmation — the template already fixes the format) and go straight to Step 6, using `create-design-from-brand-template` in place of `generate-design` / `create-design-from-candidate`. If the template supports autofill (check with `get-brand-template-dataset`), confirm the field values with the user before creating the design from it.
+- **If no good match exists, or the user prefers a custom design**, say so briefly and continue to Step 3 as normal — don't force a template match that doesn't actually fit just to avoid the concept step.
+
+## Step 3: Propose at least three design concepts — text only, no tool calls
 
 Write at least three distinct design concept pitches based on the topic. Each concept should describe a direction in a few lines: visual mood/style, color direction, layout idea, and the angle or message it leans into. Make the three genuinely different from each other (e.g. minimal/corporate vs. bold/playful vs. photo-led/editorial) so the user is picking a real direction, not a cosmetic variant.
 
@@ -27,30 +34,34 @@ Write at least three distinct design concept pitches based on the topic. Each co
 
 Present the concepts clearly labeled (Concept A/B/C…) and ask the user to pick one, or to request adjustments/new directions.
 
-## Step 3: Gate on concept approval
+## Step 4: Gate on concept approval
 
 Do not proceed past this point until the user has explicitly picked one concept. If they ask for changes, revise and re-present; if they reject all three, propose a fresh set rather than reusing the rejected ones. Treat silence or an ambiguous reply as "not yet approved" — ask again rather than assuming.
 
-## Step 4: Confirm the deliverable type
+## Step 5: Confirm the deliverable type
 
 Once a concept is approved, confirm what the user actually wants produced — this maps to `generate-design`'s `design_type` (e.g. `poster`, `instagram_post`, `presentation`, `card`, `flyer`, `logo`, `doc`, etc.). If the approved concept already implies an obvious format, propose it and let the user confirm rather than making them choose from the full enum unprompted. If it's genuinely open, ask directly.
 
 Also confirm scope details `generate-design` needs and the concept doesn't already answer — e.g. presentation length (short/balanced/comprehensive), or whether to use a brand kit (`list-brand-kits`, only if the user wants an on-brand result).
 
-## Step 5: Generate the design and save it as a draft
+## Step 6: Generate the design and save it as a draft
 
-1. Call `generate-design` with `design_type` from Step 4 and a `query` that carries the full approved concept description from Step 2 plus the topic — the tool has no memory of the conversation, so include everything relevant every time.
+If the user chose a matching template in Step 2, skip this step's `generate-design` path entirely: call `create-design-from-brand-template` with the `brand_template_id` (and any confirmed autofill field values) instead, then go straight to Step 7 — there are no candidates to pick between.
+
+Otherwise, for the custom-concept path:
+
+1. Call `generate-design` with `design_type` from Step 5 and a `query` that carries the full approved concept description from Step 3 plus the topic — the tool has no memory of the conversation, so include everything relevant every time.
 2. If candidates aren't returned synchronously, poll with `get-design-candidates` using the returned `job_id`.
 3. Show the resulting candidate thumbnail(s) to the user. If there are multiple, let them pick one — don't silently default to the first.
 4. Convert the chosen candidate into a real, saved design with `create-design-from-candidate` (`job_id` + `candidate_id`). This is the "draft save" — the design now exists in the user's Canva account.
 
-## Step 6: Share the draft for review
+## Step 7: Share the draft for review
 
 Call `get-design` on the new `design_id` to get its edit/view URL, and send that link to the user so they can review it directly in Canva. If they want edits before finalizing, use `start-editing-transaction` → `perform-editing-operations` → `commit-editing-transaction` (always get explicit user approval before the commit call, per that tool's own requirement), then re-share the updated thumbnail/link and ask again.
 
 Do not treat this step as final save — it's a draft the user is reviewing. Nothing gets exported or filed away until they say so.
 
-## Step 7: On final approval — export as PNG and file it away
+## Step 8: On final approval — export as PNG and file it away
 
 Only after the user explicitly approves saving/finalizing:
 
@@ -65,7 +76,9 @@ Only after the user explicitly approves saving/finalizing:
 ## Handling edge cases
 
 - **User rejects all proposed concepts**: propose a new set of at least three — never reuse ones already rejected, and ask what specifically missed the mark so the next set actually differs.
-- **User wants changes after the draft is saved (Step 6)**: use the editing-transaction tools, get their approval before committing, and re-share before asking for final approval again — don't re-run generation from scratch unless they ask for a different concept entirely.
+- **User wants changes after the draft is saved (Step 7)**: use the editing-transaction tools, get their approval before committing, and re-share before asking for final approval again — don't re-run generation from scratch unless they ask for a different concept entirely.
+- **No matching template found (Step 2)**: don't stall on this — say briefly that no good template match was found and move straight into proposing custom concepts.
+- **Matching template exists but the user prefers custom concepts anyway**: honor that and proceed with Step 3 — a found template is a suggestion, never a requirement.
 - **PNG unsupported for the chosen deliverable**: surface this to the user and ask how they'd like to proceed (different export format, or a different deliverable type) — don't silently export something other than PNG.
 - **Topic reused across sessions**: if a `canva/<topic>` folder already exists, reuse it — don't create duplicate folders with slightly different names for the same topic.
 - **Multi-page design**: exporting produces one PNG per page — tell the user how many files they're getting, not just one link.
