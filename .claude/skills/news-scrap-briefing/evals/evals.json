@@ -1,0 +1,31 @@
+{
+  "skill_name": "news-scrap-briefing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "네이버 뉴스 IT/과학 탭(https://news.naver.com/section/105)에서 AI 관련 기사 3개 정도 스크랩해서, 보고서(워드)랑 발표자료(PPT) 둘 다 만들어줘. 스크린샷도 같이 넣어줘.",
+      "expected_output": "3 articles scraped via Playwright with full-page screenshots saved under output/playwright/; a shared JSON built with an Overview section, one section per article (headline, source, summary, key points, embedded screenshot), and closing/sources sections; a .docx report and a .pptx deck both generated from that JSON, both containing the article screenshots, styled in Malgun Gothic with a consistent main color.",
+      "files": [],
+      "expectations": [
+        "Both a .docx and a .pptx file are produced",
+        "The content covers approximately 3 distinct AI-related articles",
+        "The .docx report has at least one embedded screenshot image",
+        "The .pptx deck has at least one slide with an embedded screenshot image",
+        "Text in the .docx uses Malgun Gothic (맑은 고딕) font",
+        "Saved screenshots are real, non-trivial captures"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "이 두 기사 스크랩해서 발표자료(PPT)로만 정리해줘. 메인 컬러는 짙은 초록(#2E7D32)으로 해줘.\n1. https://n.news.naver.com/mnews/article/018/0006349313\n2. https://n.news.naver.com/mnews/article/029/0003041749",
+      "expected_output": "Both article URLs scraped via Playwright with full-page screenshots; only a .pptx deck produced (no .docx expected since the user asked for PPT only) with title slide, one slide per article (headline, source, screenshot, key points), and a closing synthesis slide, all using main color #2E7D32.",
+      "files": [],
+      "expectations": [
+        "Only a .pptx file is produced (no .docx)",
+        "The main color #2E7D32 is actually applied to styled text",
+        "Both requested articles are represented with their own content",
+        "Saved screenshots are real, non-trivial captures"
+      ]
+    }
+  ]
+}

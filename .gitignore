@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 .playwright-mcp/
+.embed_cache/
+
+# skill-creator eval/benchmark scratch workspaces (large generated test outputs, not shipped deliverables)
+.claude/skills/*-workspace/
