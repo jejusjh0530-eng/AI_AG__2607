@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Workflow Rules
 
 - When the user types "클론해줘" (clone it), clone the connected git repository.
+- When Playwright MCP browser automation produces output files (screenshots, exports, etc.), save them under the `output/playwright/` folder.
 - When creating or modifying a `.md` file at the user's request, write its content in English.
 - Keep the `.md` file in English, and also generate a translated `.txt` version, saved in a new folder.
 - If a `.md` file is modified, update its same-named translated `.txt` file as well.
