@@ -31,6 +31,11 @@ analysis, not into Word/PowerPoint formatting.
 
 Figure out the article set before scraping:
 
+- **Source restriction**: only scrape articles from **Naver News**
+  (`news.naver.com`). If the user points at a URL or site outside Naver
+  News, or asks to search/browse a different outlet, tell them this skill
+  only sources articles from Naver News and ask for a Naver News URL,
+  section, or keyword instead — don't silently scrape the other site.
 - **Direct URL(s)** — scrape exactly those.
 - **Site + topic/keyword** (e.g. "네이버 뉴스 IT/과학 탭에서 AI 관련 기사") —
   navigate to the listing, find articles matching the topic, and pick a
