@@ -1,0 +1,5 @@
+{
+  "env": {
+    "CLAUDE_CODE_DISABLE_AGENT_VIEW": "0"
+  }
+}
