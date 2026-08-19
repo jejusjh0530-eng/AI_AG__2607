@@ -8,6 +8,16 @@
         "@playwright/mcp@latest"
       ],
       "env": {}
+    },
+    "gmail": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "gws-mcp-server",
+        "--services",
+        "gmail"
+      ],
+      "env": {}
     }
   }
 }
