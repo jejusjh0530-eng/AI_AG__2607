@@ -1,0 +1,58 @@
+---
+name: gws-forms
+description: 사용자가 제공한 제약 조건과 자료 — 주제, 질문 목록, 설문 요구사항, 퀴즈 내용, RSVP/신청서 필드 등 — 를 바탕으로 Google Form(로컬 파일도, Google Docs 설문지도 아님)을 만듭니다. 인증된 gws CLI로 Google Apps Script의 FormApp 서비스를 구동하는 방식이며, 이는 순수 Forms REST API보다 훨씬 풍부한 항목 유형(객관식, 체크박스, 드롭다운, 선형 배율, 날짜/시간, 섹션, 정답이 있는 퀴즈)을 지원합니다. 사용자가 Google Form, 설문지, 퀴즈, RSVP 폼을 만들거나 구성해 달라고 요청할 때("설문지 만들어줘", "구글 폼으로 신청서 만들어줘", "이 질문들로 퀴즈 폼 만들어줘", "make a Google Form for X") 사용하세요. gws, Apps Script, 정확한 항목 유형 이름을 언급하지 않아도 트리거합니다. Google Docs나 Sheets 요청에는 사용하지 마세요(그 경우 gws-docs나 gws sheets 직접 호출 사용) — 이 스킬은 Forms 제품 전용입니다.
+---
+
+# gws-forms
+
+## 이 스킬이 하는 일
+
+사용자가 제공한 제약 조건과 자료를 바탕으로 사용자의 Google 드라이브에 실제 Google Form을 만듭니다 — 질문을 작성해야 할 주제일 수도 있고, 이미 가지고 있는 질문 목록일 수도 있고, 정답이 있는 퀴즈 내용, 신청/RSVP 필드일 수도 있습니다.
+
+이 폼은 Forms REST API의 `forms.body` 메서드를 직접 호출하는 대신 **Google Apps Script의 `FormApp` 서비스**를 통해 만듭니다. `FormApp`은 공식적으로 지원되는, 훨씬 더 풍부한 한 번에 폼을 조립하는 방법입니다 — 선형 배율, 날짜/시간 항목, 섹션/페이지 나누기, 선택지별 정답 채점이 있는 퀴즈 등 원시 API 요청으로는 다루기 번거롭거나 아예 지원되지 않는 항목 유형과 설정을 다룰 수 있습니다. 대신 API를 통해 Apps Script를 실행하려면 원시 API 호출에는 필요 없는 최초 1회 설정이 필요합니다(아래 참고) — 하지만 이 비용은 Google 계정당 한 번만 치르면 되고, 폼 하나당 매번 드는 비용이 아닙니다.
+
+## 최초 1회 설정
+
+이 설정은 폼 단위가 아니라 Google 계정 단위입니다. 한 번 끝내두면, 이 프로젝트(또는 같은 인증 계정을 쓰는 다른 프로젝트)에서 이후의 모든 `gws-forms` 요청은 그냥 동작합니다 — 아래 "폼 만들기"로 바로 넘어가면 됩니다. 하지만 처음 한 번은, Apps Script의 Execution API가 무엇이든 실행하기 전에 세 가지가 먼저 이루어져야 하고, 각각을 빠뜨리면 **서로 다른**, 딱 봐서는 원인을 알기 어려운 방식으로 실패합니다.
+
+1. **`gws` 인증에 필요한 스코프가 있는지 확인.** `npx --yes @googleworkspace/cli auth status`를 실행해서 `"scopes"`에 `https://www.googleapis.com/auth/script.projects`와 `https://www.googleapis.com/auth/forms`가 있는지 확인하세요. 없다면
+   `npx --yes @googleworkspace/cli auth login --scopes "<기존 스코프들>,https://www.googleapis.com/auth/script.projects,https://www.googleapis.com/auth/forms"`
+   를 실행하세요 — `--services script`만 쓰면 admin directory, 전체 Gmail, spreadsheets, groups 등 이 스킬에 필요 없고 요청해서도 안 되는 훨씬 광범위한 스코프까지 딸려 옵니다. 계정의 *현재* 스코프에 이 두 개를 더해서 넘기세요.
+
+2. **`python "<skill-dir>/scripts/run_form_builder.py" ensure`를 실행.**
+   처음 실행하면 영구적으로 재사용할 "gws-forms builder" Apps Script 프로젝트 하나를 만들고, `assets/Code.gs`를 그 안에 푸시한 뒤, 실행되기 전에 브라우저에서 처리해야 할 세 가지를 담은 `setup_required` 블록을 출력합니다 — 이 스킬을 만들면서 실제로 하나하나 다 겪어본, 각각 독립적으로 발생하는 진짜 실패 모드입니다.
+
+   - **계정의 Apps Script API 활성화.** `https://script.google.com/home/usersettings`에서 (OAuth 스코프와는 별개인 계정 단위 토글입니다). 이걸 빠뜨리면 `script.projects.create` 호출이 정확히 이 사실을 알려주는 403 오류로 곧바로 실패합니다.
+   - **빌더 프로젝트의 GCP 프로젝트 연결.** `https://script.google.com/d/<scriptId>/edit` → 프로젝트 설정 → Google Cloud Platform(GCP) 프로젝트 → 프로젝트 변경으로 들어가서, gws CLI 자체 OAuth 클라이언트의 GCP 프로젝트 *번호*(프로젝트 ID 문자열이 아님)를 입력하세요 — `client_secret.json`의 클라이언트 ID 앞부분 숫자입니다(예: `828697162831-xxxx.apps.googleusercontent.com`에서 `828697162831`). `run_form_builder.py ensure`의 출력에 이 번호가 이미 추출되어 포함되어 있습니다. 새로 만든 Apps Script 프로젝트는 기본적으로 내부 "기본값" GCP 프로젝트로 설정되는데, Execution API는 이 상태로는 조용히 인증을 통과시키지 못합니다 — 호출은 `"a server error occurred while reading from storage. Error code NOT_FOUND"`로 실패하는데, 언뜻 일시적 장애처럼 보이지만 실제로는 매번 정확히 이 연결 누락 때문입니다.
+   - **스크립트 자체 권한을 한 번 승인.** 같은 에디터에서 `createForm` 함수를 선택하고 실행(실행) 버튼을 클릭하세요. `spec`이 undefined라는 매개변수 오류가 즉시 발생하는데 — 이건 예상된 것이고, 이 실행의 목적은 오직 "승인 필요" 다이얼로그 → 권한 검토 → 계속으로 이어지는 동의 흐름을 유발하기 위함입니다. 이걸 하지 않으면, GCP 프로젝트가 연결돼 있고 gws OAuth 토큰에 필요한 모든 스코프가 있어도 `403 The caller does not have permission`으로 실패합니다 — 스크립트 프로젝트는 호출하는 도구의 OAuth 승인과는 별개로 *자체적인* 독립된 권한 승인을 가지고 있습니다.
+
+   세션에서 브라우저 자동화 도구(예: Playwright MCP)를 사용할 수 있다면 이 프로젝트의 다른 `gws auth login` 브라우저 단계와 동일한 방식으로 세 단계를 직접 처리하고, 그렇지 않다면 `ensure` 출력의 정확한 URL로 사용자를 안내하세요.
+
+3. 세 가지가 끝나면 **`ensure`를 다시 실행**하세요 — 최신 `Code.gs`를 푸시하고(비용이 적고 멱등적이라 매 폼 생성 전에 호출해도 안전합니다) `{"status": "ready", ...}`를 출력해야 합니다.
+
+## 폼 만들기
+
+1. **사용자 요청을 콘텐츠 스펙으로 변환.** 사용자가 맨 주제만("설문지 하나 만들어줘, 만족도 조사용") 줬든, 완전한 질문 목록을 줬든, `assets/Code.gs`의 `createForm`이 기대하는 JSON 스키마 형태로 구성하세요 — 스키마는 그 파일 상단의 주석에 문서화되어 있습니다. 요약하면: `title`, 선택적 `description`, 그리고 각 항목이 `type`(`text`, `paragraph`, `multiple_choice`, `checkbox`, `dropdown`, `scale`, `date`, `time`, `section`)과 `title`, 유형별 필드(선택형의 `choices`, `scale`의 `lower`/`upper` 등)를 가지는 순서 있는 `items` 배열입니다. 퀴즈라면 `spec.isQuiz: true`로 설정하고, 채점 대상 항목에 `correctAnswers`(선택적으로 `points`)를 지정하세요.
+
+   이 스펙을 임시 JSON 파일에 작성하세요.
+
+2. **실행:**
+
+   ```bash
+   python "<skill-dir>/scripts/run_form_builder.py" create --spec content.json
+   ```
+
+   이 명령은 빌더 코드를 (바뀌었을 경우를 대비해) 다시 푸시한 뒤, 영구적으로 재사용하는 빌더 프로젝트에서 Apps Script Execution API를 통해 `createForm(spec)`을 호출합니다 — 폼마다 새 스크립트 프로젝트를 만들지 않는다는 점이, 위의 최초 1회 설정 이후 이 방식을 빠르게 만들어주는 핵심입니다. 성공하면 `{"formId", "editUrl", "publishedUrl"}`을 출력합니다.
+
+3. **두 링크를 모두 전달**하세요 — 사용자가 질문을 검토/수정할 `editUrl`, 실제로 응답할 사람들에게 줄 `publishedUrl` — 그리고 폼이 다루는 내용을 한 줄로 요약해서, 사용자가 더 공유하기 전에 직접 확인할 수 있게 하세요.
+
+## 항목 스키마 확장하기
+
+요청에 `assets/Code.gs`의 스키마가 아직 다루지 않는 것(파일 업로드 항목, 이미지/동영상 항목, 분기 페이지 이동 등)이 필요하면, 해당 `FormApp` 메서드(`addFileUploadItem`, `addImageItem`, `setGoToPage` 등)를 사용해 `createForm`의 `switch`에 case를 추가하세요 — [Apps Script FormApp 참조 문서](https://developers.google.com/apps-script/reference/forms/form-app)에 전체 범위가 나와 있습니다. 기존 스펙과 빌더 프로젝트 자체가 형태를 바꿀 필요가 없도록, 스펙 스키마는 추가적(새 선택 필드 추가)으로만 확장하세요.
+
+## 참고 사항
+
+- `run_form_builder.py`의 `gws` 호출은 (플랫폼 기본 셸이 아니라) `bash -lc`를 명시적으로 거칩니다. `gws-docs`의 스크립트와 같은 이유입니다: Windows에서 `npx`는 `.cmd` 파일로 해석되는데, 이는 `CreateProcess`도 `cmd.exe`도 따옴표가 포함된 JSON 인자를 깔끔하게 처리하지 못합니다. 호출하는 입장에서는 이 부분이 투명하게 처리됩니다.
+- `gws script scripts run`에 `--json`을 넘길 때는 **한 줄짜리** JSON 문자열이어야 합니다. 여러 줄로 예쁘게 포맷된 `--json` 값은 `Invalid --json body: EOF while parsing an object` 오류로 실패합니다 — `run_form_builder.py`는 (기본적으로 줄바꿈을 넣지 않는) `json.dumps`를 통해 이미 이를 올바르게 처리합니다. 혹시 스크립트를 거치지 않고 `gws`를 직접 호출한다면, 스펙 파일을 셸 인자 안에 리터럴 줄바꿈이 포함된 형태로 손으로 포맷하지 마세요.
+- 빌더 프로젝트의 스크립트 ID는 `<gws 설정 디렉터리>/forms_builder_script_id.txt`(client_secret.json 바로 옆)에 캐시됩니다 — 계정 단위 리소스이며, 이 저장소에 커밋하거나 프로젝트마다 중복 생성할 대상이 아닙니다.
+- 설정을 끝냈다고 생각했는데도 `create` 호출이 권한/스토리지/`NOT_FOUND` 오류로 실패한다면, 그 빌더 프로젝트에 대해 세 가지 최초 1회 단계를 다시 처음부터 밟아보세요 — 이 스킬을 검증하는 동안 임시 테스트 프로젝트에 대해서만 이 단계를 완료하고, 실제 사용할 빌더 프로젝트는 그 단계들을 반복하지 않은 채 새로 만드는 실수를 하기 쉽습니다.
