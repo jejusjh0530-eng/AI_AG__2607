@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(mv __clone_tmp__/.git .)",
+      "Bash(mv __clone_tmp__/.gitignore .)",
+      "Bash(mv __clone_tmp__/.mcp.json .)",
+      "Bash(mv __clone_tmp__/CLAUDE.md .)",
+      "Bash(mv __clone_tmp__/img .)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "playwright",
+    "gmail",
+    "typecast"
+  ]
+}
