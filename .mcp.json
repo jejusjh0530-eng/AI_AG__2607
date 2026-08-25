@@ -18,6 +18,19 @@
         "gmail"
       ],
       "env": {}
+    },
+    "typecast": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/neosapience/typecast-api-mcp-server.git",
+        "typecast-api-mcp-server"
+      ],
+      "env": {
+        "TYPECAST_API_KEY": "${TYPECAST_API_KEY}",
+        "TYPECAST_OUTPUT_DIR": "${TYPECAST_OUTPUT_DIR:-output/typecast}"
+      }
     }
   }
 }

@@ -5,3 +5,6 @@ __pycache__/
 
 # skill-creator eval/benchmark scratch workspaces (large generated test outputs, not shipped deliverables)
 .claude/skills/*-workspace/
+
+# nested git clone (watch skill source), not meant to be tracked as regular files
+claude-video/

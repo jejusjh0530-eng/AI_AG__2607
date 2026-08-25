@@ -1,0 +1,13 @@
+{
+  "timeZone": "Asia/Seoul",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/forms",
+    "https://www.googleapis.com/auth/forms.currentonly",
+    "https://www.googleapis.com/auth/drive"
+  ],
+  "executionApi": {
+    "access": "MYSELF"
+  }
+}

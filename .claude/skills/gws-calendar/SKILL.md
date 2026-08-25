@@ -1,162 +1,66 @@
 ---
 name: gws-calendar
-description: Creates, updates, and cancels/deletes events on the user's Google Calendar using the authenticated gws CLI. This is the write counterpart to the read-only "일정관리" weekly-briefing subagent — use this skill whenever the user wants to actually change their calendar, not just see it. Trigger on requests like "일정 등록해줘", "캘린더에 추가해줘", "다음주 금요일 3시에 미팅 잡아줘", "그 일정 시간 바꿔줘", "그거 취소해줘"/"삭제해줘", "schedule a call with X on Tuesday", even if the user doesn't mention gws or "calendar" by name — a request to book/move/cancel something at a specific time is calendar work. Do NOT use this for read-only requests ("이번주 일정 보여줘", "다음주 스케줄 알려줘") — route those to the 일정관리 subagent instead, since this skill's job is writing, not reporting.
+description: Registers a Google Calendar event exactly as the user directs, using the gws CLI (calendar +insert helper, or raw events.insert for all-day/recurring/reminder cases). Use when the user asks to add, book, or schedule something on their calendar — e.g. "이 일정 캘린더에 등록해줘", "내일 오후 3시에 회의 잡아줘", "다음 주 화요일 종일 일정 추가해줘", "이 일정 반복으로 등록해줘". This is a write skill — do not use it for read-only briefings or "이번 주 일정 알려줘" (use the schedule-manager/일정 관리 agent for those).
 ---
 
-# gws-calendar
+# Gws Calendar
 
-## What this skill does
+## Overview
 
-Books, reschedules, and cancels events on the user's actual Google
-Calendar via the `gws` CLI (Google Workspace CLI) already authenticated
-in this project — not a suggestion or a draft, a real write to their
-calendar. It's the mirror image of the `일정관리` subagent, which only
-reads and briefs; if the user just wants to see what's on their
-schedule, that's the one to use, not this skill.
+Turn a natural-language scheduling request into a Google Calendar event via the `gws` CLI. Requires `gws` to be installed and authenticated (`gws auth status` — must show `token_valid: true` and the `calendar` scope).
 
-## Before you start: check gws authentication
+Creating an event is a **visible, hard-to-fully-undo action** — it can email invites to attendees and clutters a shared calendar. Always restate the parsed details back to the user and get confirmation before calling `gws`, unless the user's own message already gave every detail explicitly and unambiguously (exact date, time, title).
 
-```bash
-npx --yes @googleworkspace/cli auth status
+## Workflow
+
+### Step 1: Extract event details from the request
+
+Pull out, in order of importance:
+- **Title/summary** (required)
+- **Start date/time** (required) — resolve relative dates ("내일", "다음 주 화요일") against the current date. If the user gives a date but no time, treat it as an **all-day event** (Step 3b), not a timed one.
+- **End date/time** — if omitted for a timed event, default to **1 hour** after start. For an all-day event, default to the same single day.
+- **Calendar** — default to `primary`. If the user names a specific calendar (e.g. "수업 캘린더에", "학원 일정에"), resolve it: `gws calendar calendarList list --params '{"maxResults": 50}'` and match by `summary`.
+- **Location, description, attendees (emails), Google Meet link** — only if mentioned.
+- **Recurrence / reminders** — only if mentioned (Step 3b).
+
+Use **RFC3339 with an explicit UTC offset** for all timed values, e.g. `2026-08-22T15:00:00+09:00`. Default to `+09:00` (Asia/Seoul) unless the target calendar's `timeZone` (from `calendarList`) says otherwise or the user specifies a different zone.
+
+### Step 2: Confirm with the user
+
+Restate: title, date/time (or "종일"/all-day), calendar, and any attendees/location. Skip this only when the user's request already unambiguously specified every field being used.
+
+### Step 3a: Simple timed event → use the `+insert` helper
+
+```
+gws calendar +insert --summary '<title>' --start '<RFC3339>' --end '<RFC3339>' \
+  [--calendar <calendarId>] [--location '<text>'] [--description '<text>'] \
+  [--attendee <email>] [--attendee <email2>] [--meet]
 ```
 
-Check `"scopes"` for `https://www.googleapis.com/auth/calendar`. If it's
-missing, the calls below fail with an auth error (exit code 2) instead of
-a helpful message, so it's worth checking first. To add the scope
-without dropping ones already granted for other services in this
-project:
+`--attendee` can repeat. `--meet` attaches a Google Meet link. This covers the large majority of requests.
 
-```bash
-npx --yes @googleworkspace/cli auth login --services calendar,docs,drive,gmail,forms
+### Step 3b: All-day, recurring, or reminder-customized event → raw `events.insert`
+
+`+insert` cannot express all-day dates, recurrence rules, or custom reminders. Build the request body per `references/event_json.md` and send it directly:
+
+```
+gws calendar events insert --params '{"calendarId": "<calendarId or primary>"}' --json '<event JSON>'
 ```
 
-This opens a browser consent URL — drive it yourself if a
-browser-automation tool is available in the session, otherwise share the
-URL and ask the user to complete it.
+### Step 4: Report the result
 
-## Anchor "today" before doing any date math
+From the response, tell the user the event was created and give the `htmlLink` so they can open it directly in Google Calendar. If attendees were added, mention that invites were sent.
 
-Requests like "다음주 금요일", "내일 오후 3시", "이번 주말" only make sense
-relative to the actual current date — don't assume or infer it from
-context. Get it for real:
+### Step 5: Editing or cancelling afterward
 
-```bash
-date "+%Y-%m-%d %A"
-```
+Reuse the `id` returned from `insert`:
+- Update: `gws calendar events patch --params '{"calendarId": "<id>", "eventId": "<eventId>"}' --json '{...fields to change...}'`
+- Delete: `gws calendar events delete --params '{"calendarId": "<id>", "eventId": "<eventId>"}' -o <scratch-dir>/delete.html`
 
-Default to the `Asia/Seoul` timezone (`+09:00`) unless the user's context
-clearly indicates otherwise.
-
-## Creating an event
-
-1. **Extract the concrete fields** from what the user asked for: title
-   (`summary`), start time, end time (or duration), location,
-   description, attendee emails, recurrence. If they gave a duration but
-   no end time, compute it; if neither is given, default to **1 hour**
-   for a timed event and say so in your confirmation back to them, rather
-   than silently picking something they didn't ask for and never
-   mentioning it.
-
-2. **Build the event body.** For a timed event:
-
-   ```json
-   {
-     "summary": "팀 회의",
-     "location": "회의실 A",
-     "description": "분기 리뷰",
-     "start": {"dateTime": "2026-08-28T15:00:00+09:00", "timeZone": "Asia/Seoul"},
-     "end":   {"dateTime": "2026-08-28T16:00:00+09:00", "timeZone": "Asia/Seoul"},
-     "attendees": [{"email": "someone@example.com"}],
-     "recurrence": ["RRULE:FREQ=WEEKLY;COUNT=4"]
-   }
-   ```
-
-   For an all-day event, use `{"date": "2026-08-28"}` instead of
-   `dateTime`/`timeZone` on both `start` and `end` — and remember the
-   Calendar API treats the all-day `end.date` as exclusive (the day
-   *after* the last day the event covers), which trips people up on
-   multi-day all-day events if you forget it.
-
-3. **Insert it:**
-
-   ```bash
-   gws calendar events insert --params '{"calendarId":"primary","sendUpdates":"none"}' --json '<body from step 2>'
-   ```
-
-   Default `sendUpdates` to `"none"` so attendees aren't emailed
-   automatically. Only switch it to `"all"` if the user explicitly asked
-   to notify or invite them — sending mail on someone's behalf on their
-   Google account is the kind of side effect worth a heads-up, not a
-   silent default.
-
-4. **Confirm in plain language**, in the terms the user used ("금요일
-   오후 3시", not the raw RFC3339 string), and include the response's
-   `htmlLink` so they can open the event directly to double-check it.
-
-## Updating an event
-
-Never guess which event to touch from a vague reference — look it up
-first.
-
-1. **Find it:**
-
-   ```bash
-   gws calendar events list --params '{"calendarId":"primary","timeMin":"<range-start>","timeMax":"<range-end>","singleEvents":true,"orderBy":"startTime","q":"<keyword>"}'
-   ```
-
-   Always pass `singleEvents: true` with `orderBy: startTime` together —
-   this expands recurring events into concrete instances in chronological
-   order instead of returning the recurring series as a single item,
-   which is what you want when trying to identify *which* occurrence the
-   user means. `q` is a free-text filter; a `timeMin`/`timeMax` window
-   from what the user said (e.g. "그 회의" said right after discussing
-   Friday narrows the search to Friday) usually narrows things down more
-   reliably than `q` alone.
-
-2. **Decide from the results:** exactly one match → proceed. Zero
-   matches → tell the user you couldn't find it and ask for more detail;
-   don't fabricate an event ID. More than one → show the candidates
-   (title + time) and ask which one, rather than guessing.
-
-3. **Apply only the changed fields** with `patch` (not `update`, which
-   requires resending the entire resource):
-
-   ```bash
-   gws calendar events patch --params '{"calendarId":"primary","eventId":"<id>","sendUpdates":"none"}' --json '{"start":{...},"end":{...}}'
-   ```
-
-4. **Confirm the change** the same way as for creation.
-
-## Cancelling / deleting an event
-
-Same lookup as updating, but treat this as the highest-care action this
-skill performs — there's no in-CLI undo. After finding the single
-matching event, show its details (title, date/time, attendees if any)
-and get an explicit go-ahead before running:
-
-```bash
-gws calendar events delete --params '{"calendarId":"primary","eventId":"<id>","sendUpdates":"none"}'
-```
-
-The only time it's fine to skip the extra confirmation is when the user
-named the event unambiguously in the same message that asked for the
-cancellation (e.g. they quoted the exact title and only one event
-matches it) — otherwise, show what you found before deleting it. This
-mirrors how you'd already treat any other destructive, hard-to-reverse
-action.
+`events delete` returns an empty response, and `gws` writes that as a `download.html` file in the current directory if `-o` is omitted — always pass `-o` pointing at a scratch path so it doesn't litter the project directory.
 
 ## Notes
 
-- Calendar's full-text `q` search can lag a few seconds right after an
-  event was just created or patched — if you insert an event and then
-  immediately try to look it up again by searching instead of using the
-  ID the insert call already gave you, don't be surprised if it comes up
-  empty. Prefer the ID you already have over re-searching for something
-  you just touched.
-- If `gws auth status` shows the `calendar` scope but a call still fails
-  with an auth error, the token may predate this skill's requirements —
-  re-run the `auth login` command above with the full service list.
-- Don't fabricate an event ID, attendee email, or time you weren't given
-  or couldn't find by looking — ask instead.
-- If the user just wants to know what's on their calendar rather than
-  change it, that's the `일정관리` subagent's job, not this skill's.
+- If `gws auth status` shows the `calendar` scope missing or `token_valid: false`, stop and tell the user to run `gws auth login` before continuing.
+- Never invent attendee emails or a location that wasn't given — leave those fields out entirely rather than guessing.
+- Adding `--attendee` sends that person a real invite email. Always confirm the attendee list with the user before running the command (per Step 2) — this isn't a locally-reversible action. For explicit control over whether/who gets emailed, use the raw form with `sendUpdates` (see `references/event_json.md`).
